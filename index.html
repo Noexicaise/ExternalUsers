@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outil de Décision - Matériel & Accès (Cloud)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .checkbox-item:hover {
+            background-color: #f1f5f9;
+        }
+        .hidden-field {
+            display: none;
+        }
+        .loading-spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            body {
+                background-color: white;
+                padding: 0;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-800">Décision Matériel & Accès</h1>
+            <p class="text-slate-500 mt-2 italic">Arbitrage partagé en temps réel</p>
+            <div id="status-indicator" class="mt-2 text-xs font-medium text-slate-400 no-print flex items-center justify-center gap-2">
+                <!-- Statut mis à jour par JS -->
+            </div>
+        </header>
+
+        <!-- Formulaire de configuration -->
+        <div class="card p-6 mb-8 no-print">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Catégorie -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Entité / Catégorie</label>
+                    <select id="category" onchange="toggleOtherCategory(this.value)" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-medium">
+                        <option value="INASTI">INASTI</option>
+                        <option value="Ombudsman">Ombudsman</option>
+                        <option value="Cabinet Ministériel">Cabinet Ministériel</option>
+                        <option value="Cabinet de Pensions">Cabinet de Pensions</option>
+                        <option value="Audit Externe">Audit Externe</option>
+                        <option value="Cour des Comptes">Cour des Comptes</option>
+                        <option value="Consultant Externe">Consultant Externe</option>
+                        <option value="Partenaire IT Externe">Partenaire IT Externe</option>
+                        <option value="Universités">Universités</option>
+                        <option value="Autre">-- Autre (Saisie libre) --</option>
+                    </select>
+                    <input type="text" id="other-category-name" placeholder="Nom de l'entité personnalisée..." class="hidden-field mt-3 w-full p-3 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:outline-none bg-orange-50">
+                </div>
+
+                <!-- Matériel -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Matériel Requis</label>
+                    <select id="hardware" onchange="toggleOtherHardware(this.value)" class="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white font-medium">
+                        <option value="Aucun Matériel (BYOD)">Aucun Matériel (BYOD)</option>
+                        <option value="Laptop Standard">Laptop Standard</option>
+                        <option value="Laptop Standard + Smartphone et/ou Tablette">Laptop Standard + Smartphone et/ou Tablette</option>
+                        <option value="Smartphone et/ou Tablette">Smartphone et/ou Tablette</option>
+                        <option value="Autre">-- Autre (Saisie libre) --</option>
+                    </select>
+                    <input type="text" id="other-hardware-name" placeholder="Précisez le matériel requis..." class="hidden-field mt-3 w-full p-3 border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-emerald-50">
+                </div>
+
+                <!-- Accès -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Types d'Accès (multi-choix)</label>
+                    <div id="access-options" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-4 border border-slate-300 rounded-lg bg-slate-50">
+                        <label class="checkbox-item flex items-center p-2 rounded cursor-pointer transition-colors">
+                            <input type="checkbox" value="Aucun" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mr-3">
+                            <span class="text-sm text-slate-700 font-medium">Aucun</span>
+                        </label>
+                        <label class="checkbox-item flex items-center p-2 rounded cursor-pointer transition-colors">
+                            <input type="checkbox" value="VPN" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mr-3">
+                            <span class="text-sm text-slate-700 font-medium">VPN</span>
+                        </label>
+                        <label class="checkbox-item flex items-center p-2 rounded cursor-pointer transition-colors">
+                            <input type="checkbox" value="Theseos" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mr-3">
+                            <span class="text-sm text-slate-700 font-medium">Theseos</span>
+                        </label>
+                        <label class="checkbox-item flex items-center p-2 rounded cursor-pointer transition-colors">
+                            <input type="checkbox" value="O365 (Teams, Suite Office...)" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mr-3">
+                            <span class="text-sm text-slate-700 font-medium">O365 (Teams, Outlook, Office)</span>
+                        </label>
+                        <label class="checkbox-item flex items-center p-2 rounded cursor-pointer transition-colors">
+                            <input type="checkbox" value="App .NET (Intra, KM, HR-NET)" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mr-3">
+                            <span class="text-sm text-slate-700 font-medium">Application .NET (Intra-NET...)</span>
+                        </label>
+                        <label class="checkbox-item flex items-center p-2 rounded cursor-pointer transition-colors bg-indigo-50 border border-indigo-100">
+                            <input type="checkbox" id="check-other-access" value="AutreAccès" onchange="toggleOtherAccessField(this.checked)" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mr-3">
+                            <span class="text-sm text-indigo-800 font-bold">Autre accès...</span>
+                        </label>
+                    </div>
+                    <input type="text" id="other-access-text" placeholder="Saisissez l'accès spécifique ici..." class="hidden-field mt-3 w-full p-3 border border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-indigo-50 font-medium">
+                </div>
+
+                <!-- Bouton Action -->
+                <div class="md:col-span-2">
+                    <button id="add-btn" onclick="addDecision()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 text-lg disabled:opacity-50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        Valider la décision
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Tableau des décisions -->
+        <div class="card overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800">Matrice de Décision Finale</h2>
+                <div class="flex gap-4 items-center no-print">
+                    <button id="share-btn" onclick="copyAppUrl()" class="text-xs bg-white border border-slate-200 px-3 py-1.5 rounded-lg font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-1.5 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        <span>Partager l'outil</span>
+                    </button>
+                    <button onclick="clearAll()" class="text-sm text-red-600 hover:text-red-800 font-medium">Réinitialiser</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold">
+                            <th class="px-6 py-4 border-b">Catégorie / Entité</th>
+                            <th class="px-6 py-4 border-b">Matériel</th>
+                            <th class="px-6 py-4 border-b">Type(s) d'Accès</th>
+                            <th class="px-6 py-4 border-b text-center no-print">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="decision-table-body" class="divide-y divide-slate-200 text-sm">
+                        <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">Chargement des données...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-8 flex flex-col items-center gap-4 no-print text-center">
+            <button onclick="window.print()" class="bg-slate-800 text-white px-10 py-4 rounded-full text-sm font-bold hover:bg-slate-900 transition-all flex items-center gap-3 shadow-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                IMPRIMER / EXPORTER EN PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-decision-tool';
+
+        let user = null;
+        let decisions = [];
+
+        const setStatus = (msg, loading = false) => {
+            const el = document.getElementById('status-indicator');
+            el.innerHTML = loading ? `<div class="loading-spinner"></div> <span>${msg}</span>` : `<span>● ${msg}</span>`;
+            el.className = `mt-2 text-xs font-medium flex items-center justify-center gap-2 ${loading ? 'text-indigo-500' : 'text-emerald-500'}`;
+        };
+
+        const initAuth = async () => {
+            setStatus("Synchronisation...", true);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                setStatus("Mode déconnecté");
+            }
+        };
+
+        onAuthStateChanged(auth, (u) => {
+            user = u;
+            if (user) {
+                setStatus("Données synchronisées");
+                loadData();
+            }
+        });
+
+        const loadData = () => {
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'decisions');
+            onSnapshot(q, (snapshot) => {
+                decisions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTable();
+            }, (error) => {
+                setStatus("Erreur de synchronisation");
+            });
+        };
+
+        // UI Interactions
+        window.toggleOtherCategory = (val) => {
+            const otherField = document.getElementById('other-category-name');
+            otherField.style.display = (val === 'Autre') ? 'block' : 'none';
+            if (val === 'Autre') otherField.focus();
+        };
+
+        window.toggleOtherHardware = (val) => {
+            const otherField = document.getElementById('other-hardware-name');
+            otherField.style.display = (val === 'Autre') ? 'block' : 'none';
+            if (val === 'Autre') otherField.focus();
+        };
+
+        window.toggleOtherAccessField = (isChecked) => {
+            const otherAccessText = document.getElementById('other-access-text');
+            otherAccessText.style.display = isChecked ? 'block' : 'none';
+            if (isChecked) otherAccessText.focus();
+        };
+
+        window.renderTable = () => {
+            const tableBody = document.getElementById('decision-table-body');
+            tableBody.innerHTML = '';
+
+            if (decisions.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">Aucune donnée pour le moment.</td></tr>`;
+                return;
+            }
+
+            decisions.sort((a, b) => a.category.localeCompare(b.category));
+
+            decisions.forEach((d) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-colors";
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-slate-800 uppercase tracking-tight">${d.category}</td>
+                    <td class="px-6 py-4 text-slate-600 font-medium">${d.hardware}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${d.access.split('|').map(acc => `<span class="bg-indigo-50 text-indigo-700 px-2 py-1 rounded text-xs border border-indigo-100 font-bold">${acc}</span>`).join('')}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center no-print">
+                        <button onclick="deleteRow('${d.id}')" class="text-slate-300 hover:text-red-600 transition-colors">
+                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+
+        window.addDecision = async () => {
+            if (!user) { alert("Attente de connexion au cloud..."); return; }
+            const btn = document.getElementById('add-btn');
+            btn.disabled = true;
+
+            let category = document.getElementById('category').value;
+            const otherCatName = document.getElementById('other-category-name').value.trim();
+            if (category === 'Autre') {
+                if (!otherCatName) { alert("Précisez le nom de l'entité."); btn.disabled = false; return; }
+                category = otherCatName.toUpperCase();
+            }
+
+            let hardware = document.getElementById('hardware').value;
+            const otherHwName = document.getElementById('other-hardware-name').value.trim();
+            if (hardware === 'Autre') {
+                if (!otherHwName) { alert("Précisez le matériel."); btn.disabled = false; return; }
+                hardware = otherHwName;
+            }
+            
+            const selectedAccess = [];
+            const checkboxes = document.querySelectorAll('#access-options input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    if (cb.id === 'check-other-access') {
+                        const customVal = document.getElementById('other-access-text').value.trim();
+                        if (customVal) selectedAccess.push(customVal);
+                    } else {
+                        selectedAccess.push(cb.value);
+                    }
+                }
+            });
+
+            if (selectedAccess.length === 0) {
+                alert("Choisissez au moins un type d'accès.");
+                btn.disabled = false;
+                return;
+            }
+
+            const docId = category.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+            try {
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'decisions', docId), {
+                    category, hardware, access: selectedAccess.join('|'), updatedAt: Date.now()
+                });
+                
+                // Reset form
+                checkboxes.forEach(cb => cb.checked = false);
+                document.getElementById('other-category-name').value = '';
+                document.getElementById('other-hardware-name').value = '';
+                document.getElementById('other-access-text').value = '';
+                window.toggleOtherAccessField(false);
+            } catch (e) {
+                alert("Erreur réseau. Réessayez.");
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        window.deleteRow = async (id) => {
+            if (!user) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'decisions', id));
+            } catch (e) {}
+        };
+
+        window.clearAll = async () => {
+            if (!user) return;
+            if (confirm("Vider définitivement la liste partagée ?")) {
+                for (const d of decisions) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'decisions', d.id));
+                }
+            }
+        };
+
+        // Correction de la fonction de partage pour éviter l'erreur 404
+        window.copyAppUrl = () => {
+            const shareBtn = document.getElementById('share-btn');
+            const originalHtml = shareBtn.innerHTML;
+            
+            // On récupère l'URL du parent si on est dans un iframe (si possible) 
+            // ou on utilise l'URL actuelle en nettoyant les segments de prévisualisation Google
+            let url = window.location.href;
+            
+            // Si l'URL contient des segments typiques de l'environnement de rendu interne
+            if (url.includes('googleusercontent.com') || url.includes('localhost')) {
+                // Dans cet environnement spécifique, nous fournissons un message explicatif 
+                // car l'URL de l'iframe n'est pas partageable telle quelle.
+                alert("Pour partager cet outil, copiez l'URL qui s'affiche dans la barre d'adresse de votre navigateur (en haut).");
+                return;
+            }
+
+            const tempInput = document.createElement("input");
+            document.body.appendChild(tempInput);
+            tempInput.value = url;
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            // Feedback visuel sur le bouton
+            shareBtn.innerHTML = "✅ Lien copié !";
+            shareBtn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+            
+            setTimeout(() => {
+                shareBtn.innerHTML = originalHtml;
+                shareBtn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+            }, 2000);
+        };
+
+        initAuth();
+    </script>
+</body>
+</html>
