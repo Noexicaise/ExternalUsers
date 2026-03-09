@@ -40,6 +40,15 @@
         }
         
         @media print { .no-print { display: none; } }
+
+        /* Style spécifique pour le conteneur du logo */
+        .logo-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -47,7 +56,9 @@
     <div class="max-w-6xl mx-auto">
         <!-- Header avec Logo -->
         <header class="mb-10 flex flex-col items-center">
-            <img src="logo.png" alt="Logo Institutionnel" class="h-24 mb-4 object-contain" onerror="this.style.display='none'">
+            <div class="logo-container">
+                <img src="logo.png" alt="Logo Institutionnel" class="h-32 w-auto object-contain" onerror="this.alt='[Image de Logo Institutionnel]'">
+            </div>
             <h1 class="text-3xl font-extrabold text-secondary tracking-tight">Décision Matériel & Accès</h1>
             <div id="status-indicator" class="mt-3 text-xs font-bold uppercase tracking-widest text-slate-400 no-print flex items-center gap-2">
                 Initialisation système...
@@ -148,7 +159,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- DONNÉES FIREBASE MISES À JOUR ---
         const firebaseConfig = {
             apiKey: "AIzaSyDq6ChjjTWckfBP9z1oLvpXIp9rPriUKvc",
             authDomain: "externalusers-f112c.firebaseapp.com",
@@ -157,7 +167,6 @@
             messagingSenderId: "383725496750",
             appId: "1:383725496750:web:595ffd58a4cb4fd5cd003f"
         };
-        // -------------------------------------
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -235,12 +244,11 @@
                 const docId = category.toLowerCase().replace(/[^a-z0-9]/g, '_');
                 await setDoc(doc(db, COLLECTION_NAME, docId), { category, hardware, access: access.join('|'), ts: Date.now() });
                 
-                // Reset simple des champs spécifiques
                 document.getElementById('other-category-name').value = "";
                 document.getElementById('other-hardware-name').value = "";
                 document.getElementById('other-access-text').value = "";
             } catch (e) { 
-                alert("Erreur d'écriture. Vérifiez que Firestore est bien en 'Mode Test'."); 
+                alert("Erreur d'écriture."); 
             }
             btn.disabled = false;
         };
