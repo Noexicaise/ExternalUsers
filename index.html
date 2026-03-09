@@ -51,26 +51,33 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-width: 200px;
+            min-width: 240px;
+            border: 1px solid #e2e8f0;
         }
 
         .logo-img {
-            max-height: 120px;
+            max-height: 110px;
+            max-width: 220px;
             width: auto;
             display: block;
+            object-fit: contain;
         }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-6xl mx-auto">
-        <!-- Header avec Logo -->
+        <!-- Header avec Logo GitHub -->
         <header class="mb-10 flex flex-col items-center">
             <div class="logo-container">
-                <!-- Utilisation de l'image fournie logo.png -->
-                <img src="logo.png" alt="Logo Institutionnel" class="logo-img" onerror="this.alt='[Image de Logo Institutionnel]'">
+                <!-- Lien direct vers votre logo GitHub Raw -->
+                <img id="main-logo" 
+                     src="https://github.com/Noexicaise/ExternalUsers/blob/main/logo.png?raw=true" 
+                     alt="Logo Institutionnel" 
+                     class="logo-img" 
+                     onerror="this.onerror=null; this.src='https://placehold.co/240x120/white/1B2D5B?text=LOGO+INSTITUTIONNEL';">
             </div>
-            <h1 class="text-3xl font-extrabold text-secondary tracking-tight">Décision Matériel & Accès</h1>
+            <h1 class="text-3xl font-extrabold text-secondary tracking-tight text-center">Décision Matériel & Accès</h1>
             <div id="status-indicator" class="mt-3 text-xs font-bold uppercase tracking-widest text-slate-400 no-print flex items-center gap-2">
                 Initialisation système...
             </div>
@@ -182,7 +189,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const COLLECTION_NAME = "decisions_matrice_v2";
+        
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'external-decision-tool-v1';
+        const COLLECTION_PATH = `artifacts/${appId}/public/data/matrix`;
 
         let user = null;
         let decisions = [];
@@ -194,38 +203,46 @@
             el.className = `mt-3 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${loading ? 'text-accent' : 'text-emerald-600'}`;
         };
 
-        signInAnonymously(auth).then(cred => {
-            user = cred.user;
-            setStatus("Accès Cloud Établi");
-            loadData();
-        }).catch(err => {
-            setStatus("Erreur de liaison");
-            console.error(err);
-        });
+        const initAuth = async () => {
+            try {
+                const cred = await signInAnonymously(auth);
+                user = cred.user;
+                setStatus("Cloud opérationnel");
+                loadData();
+            } catch (err) {
+                setStatus("Erreur Cloud");
+                console.error(err);
+            }
+        };
+
+        initAuth();
 
         const loadData = () => {
-            onSnapshot(collection(db, COLLECTION_NAME), (snap) => {
+            if (!user) return;
+            onSnapshot(collection(db, COLLECTION_PATH), (snap) => {
                 decisions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderTable();
             }, (error) => {
-                console.error("Erreur de lecture Firestore:", error);
+                console.error("Firestore Error:", error);
             });
         };
 
         window.renderTable = () => {
             const body = document.getElementById('decision-table-body');
             if (!body) return;
-            body.innerHTML = decisions.length ? '' : '<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">Aucun enregistrement trouvé.</td></tr>';
+            body.innerHTML = decisions.length ? '' : '<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">Aucune règle définie.</td></tr>';
             
-            decisions.sort((a,b) => a.category.localeCompare(b.category)).forEach(d => {
+            const sorted = [...decisions].sort((a,b) => (a.category || "").localeCompare(b.category || ""));
+            
+            sorted.forEach(d => {
                 const row = document.createElement('tr');
-                row.className = "hover:bg-slate-50 transition-colors group";
+                row.className = "hover:bg-slate-50 transition-colors group border-b border-slate-100";
                 row.innerHTML = `
                     <td class="px-4 py-4 font-bold text-secondary border-l-4 border-transparent group-hover:border-accent">${d.category}</td>
                     <td class="px-4 py-4 text-slate-600">${d.hardware}</td>
-                    <td class="px-4 py-4">${d.access.split('|').map(a => `<span class="inline-block bg-slate-100 text-secondary px-2 py-0.5 rounded text-[10px] mr-1 border border-slate-200 font-bold mb-1 uppercase">${a}</span>`).join('')}</td>
+                    <td class="px-4 py-4">${(d.access || "").split('|').map(a => `<span class="inline-block bg-slate-100 text-secondary px-2 py-0.5 rounded text-[10px] mr-1 border border-slate-200 font-bold mb-1 uppercase">${a}</span>`).join('')}</td>
                     <td class="px-4 py-4 no-print text-center">
-                        <button onclick="deleteRow('${d.id}')" class="text-slate-300 hover:text-primary transition-colors">
+                        <button onclick="deleteRow('${d.id}')" class="text-slate-300 hover:text-primary transition-colors p-2">
                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
                     </td>
@@ -235,21 +252,21 @@
         };
 
         window.addDecision = async () => {
+            if (!user) return;
             const btn = document.getElementById('add-btn');
-            if (!btn) return;
             btn.disabled = true;
 
             let category = document.getElementById('category').value;
             if (category === 'Autre') {
                 const other = document.getElementById('other-category-name').value.trim();
-                if (!other) { alert("Veuillez saisir le nom de l'entité."); btn.disabled = false; return; }
+                if (!other) { alert("Nom d'entité requis"); btn.disabled = false; return; }
                 category = other.toUpperCase();
             }
 
             let hardware = document.getElementById('hardware').value;
             if (hardware === 'Autre') {
                 const otherH = document.getElementById('other-hardware-name').value.trim();
-                if (!otherH) { alert("Veuillez préciser le matériel."); btn.disabled = false; return; }
+                if (!otherH) { alert("Précision matériel requise"); btn.disabled = false; return; }
                 hardware = otherH;
             }
 
@@ -260,35 +277,46 @@
                 return cb.value;
             }).filter(v => v);
 
-            if (!category || !access.length) { alert("Saisie incomplète (Entité et au moins un accès requis)."); btn.disabled = false; return; }
+            if (!category || !access.length) { 
+                alert("Veuillez remplir l'entité et au moins un accès."); 
+                btn.disabled = false; 
+                return; 
+            }
 
             try {
-                // Utilisation d'un ID basé sur le nom pour éviter les doublons accidentels par entité
                 const docId = category.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                await setDoc(doc(db, COLLECTION_NAME, docId), { category, hardware, access: access.join('|'), ts: Date.now() });
+                await setDoc(doc(db, COLLECTION_PATH, docId), { 
+                    category, 
+                    hardware, 
+                    access: access.join('|'), 
+                    updatedAt: Date.now() 
+                });
                 
-                // Reset fields
+                // Reset form
                 document.getElementById('other-category-name').value = "";
                 document.getElementById('other-hardware-name').value = "";
                 document.getElementById('other-access-text').value = "";
-                document.getElementById('check-other-access').checked = false;
+                document.querySelectorAll('#access-options input').forEach(cb => cb.checked = false);
                 toggleOtherAccessField(false);
             } catch (e) { 
-                alert("Erreur lors de l'enregistrement sur le cloud."); 
-                console.error(e);
+                console.error("Save Error:", e);
             }
             btn.disabled = false;
         };
 
-        window.deleteRow = (id) => {
-            if(confirm("Supprimer cet enregistrement ?")) {
-                deleteDoc(doc(db, COLLECTION_NAME, id));
+        window.deleteRow = async (id) => {
+            if (!user) return;
+            if(confirm("Confirmer la suppression ?")) {
+                await deleteDoc(doc(db, COLLECTION_PATH, id));
             }
         };
 
-        window.clearAll = () => { 
-            if(confirm("Êtes-vous sûr de vouloir réinitialiser l'ensemble de la matrice ? Cette action est irréversible.")) {
-                decisions.forEach(d => deleteDoc(doc(db, COLLECTION_NAME, d.id)));
+        window.clearAll = async () => { 
+            if (!user) return;
+            if(confirm("Réinitialiser toute la matrice ?")) {
+                for (const d of decisions) {
+                    await deleteDoc(doc(db, COLLECTION_PATH, d.id));
+                }
             }
         };
 
