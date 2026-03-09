@@ -44,10 +44,20 @@
         /* Style spécifique pour le conteneur du logo */
         .logo-container {
             background: white;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(27, 45, 91, 0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 200px;
+        }
+
+        .logo-img {
+            max-height: 120px;
+            width: auto;
+            display: block;
         }
     </style>
 </head>
@@ -57,7 +67,8 @@
         <!-- Header avec Logo -->
         <header class="mb-10 flex flex-col items-center">
             <div class="logo-container">
-                <img src="logo.png" alt="Logo Institutionnel" class="h-32 w-auto object-contain" onerror="this.alt='[Image de Logo Institutionnel]'">
+                <!-- Utilisation de l'image fournie logo.png -->
+                <img src="logo.png" alt="Logo Institutionnel" class="logo-img" onerror="this.alt='[Image de Logo Institutionnel]'">
             </div>
             <h1 class="text-3xl font-extrabold text-secondary tracking-tight">Décision Matériel & Accès</h1>
             <div id="status-indicator" class="mt-3 text-xs font-bold uppercase tracking-widest text-slate-400 no-print flex items-center gap-2">
@@ -66,7 +77,7 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Formulaire -->
+            <!-- Formulaire de saisie -->
             <div class="lg:col-span-5 no-print">
                 <div class="card p-6">
                     <h2 class="text-lg font-bold text-secondary mb-6 border-b pb-2">Nouveau Paramétrage</h2>
@@ -120,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- Matrice -->
+            <!-- Matrice récapitulative -->
             <div class="lg:col-span-7">
                 <div class="card overflow-hidden">
                     <div class="bg-secondary px-6 py-4 flex justify-between items-center">
@@ -145,7 +156,7 @@
                 </div>
                 
                 <div class="mt-6 flex justify-end no-print">
-                    <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-slate-300 text-secondary px-4 py-2 rounded text-xs font-bold hover:bg-slate-50 transition-all">
+                    <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-slate-300 text-secondary px-4 py-2 rounded text-xs font-bold hover:bg-slate-50 transition-all shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                         EXPORTER EN PDF / IMPRIMER
                     </button>
@@ -229,32 +240,57 @@
             btn.disabled = true;
 
             let category = document.getElementById('category').value;
-            if (category === 'Autre') category = document.getElementById('other-category-name').value.trim().toUpperCase();
+            if (category === 'Autre') {
+                const other = document.getElementById('other-category-name').value.trim();
+                if (!other) { alert("Veuillez saisir le nom de l'entité."); btn.disabled = false; return; }
+                category = other.toUpperCase();
+            }
 
             let hardware = document.getElementById('hardware').value;
-            if (hardware === 'Autre') hardware = document.getElementById('other-hardware-name').value.trim();
+            if (hardware === 'Autre') {
+                const otherH = document.getElementById('other-hardware-name').value.trim();
+                if (!otherH) { alert("Veuillez préciser le matériel."); btn.disabled = false; return; }
+                hardware = otherH;
+            }
 
             const access = Array.from(document.querySelectorAll('#access-options input:checked')).map(cb => {
-                return cb.id === 'check-other-access' ? document.getElementById('other-access-text').value.trim() : cb.value;
+                if (cb.id === 'check-other-access') {
+                    return document.getElementById('other-access-text').value.trim();
+                }
+                return cb.value;
             }).filter(v => v);
 
-            if (!category || !access.length) { alert("Saisie incomplète."); btn.disabled = false; return; }
+            if (!category || !access.length) { alert("Saisie incomplète (Entité et au moins un accès requis)."); btn.disabled = false; return; }
 
             try {
+                // Utilisation d'un ID basé sur le nom pour éviter les doublons accidentels par entité
                 const docId = category.toLowerCase().replace(/[^a-z0-9]/g, '_');
                 await setDoc(doc(db, COLLECTION_NAME, docId), { category, hardware, access: access.join('|'), ts: Date.now() });
                 
+                // Reset fields
                 document.getElementById('other-category-name').value = "";
                 document.getElementById('other-hardware-name').value = "";
                 document.getElementById('other-access-text').value = "";
+                document.getElementById('check-other-access').checked = false;
+                toggleOtherAccessField(false);
             } catch (e) { 
-                alert("Erreur d'écriture."); 
+                alert("Erreur lors de l'enregistrement sur le cloud."); 
+                console.error(e);
             }
             btn.disabled = false;
         };
 
-        window.deleteRow = (id) => deleteDoc(doc(db, COLLECTION_NAME, id));
-        window.clearAll = () => { if(confirm("Réinitialiser l'ensemble de la matrice ?")) decisions.forEach(d => deleteRow(d.id)); };
+        window.deleteRow = (id) => {
+            if(confirm("Supprimer cet enregistrement ?")) {
+                deleteDoc(doc(db, COLLECTION_NAME, id));
+            }
+        };
+
+        window.clearAll = () => { 
+            if(confirm("Êtes-vous sûr de vouloir réinitialiser l'ensemble de la matrice ? Cette action est irréversible.")) {
+                decisions.forEach(d => deleteDoc(doc(db, COLLECTION_NAME, d.id)));
+            }
+        };
 
         window.toggleOtherCategory = v => document.getElementById('other-category-name').style.display = v === 'Autre' ? 'block' : 'none';
         window.toggleOtherHardware = v => document.getElementById('other-hardware-name').style.display = v === 'Autre' ? 'block' : 'none';
