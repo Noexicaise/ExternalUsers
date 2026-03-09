@@ -6,101 +6,139 @@
     <title>Outil de Décision - Matériel & Accès</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #f8fafc; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        :root {
+            --primary-color: #B71E4C;    /* Bordeaux */
+            --secondary-color: #1B2D5B;  /* Bleu Nuit */
+            --accent-color: #2CA1AC;     /* Turquoise */
+        }
+        body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        .bg-primary { background-color: var(--primary-color); }
+        .bg-secondary { background-color: var(--secondary-color); }
+        .bg-accent { background-color: var(--accent-color); }
+        .text-primary { color: var(--primary-color); }
+        .text-secondary { color: var(--secondary-color); }
+        .border-accent { border-color: var(--accent-color); }
+
+        .card { background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(27, 45, 91, 0.1); border-top: 4px solid var(--primary-color); }
         .hidden-field { display: none; }
+        
         .loading-spinner {
-            border: 3px solid rgba(0, 0, 0, 0.1);
-            width: 24px; height: 24px; border-radius: 50%;
-            border-left-color: #4f46e5; animation: spin 1s linear infinite;
+            border: 3px solid rgba(27, 45, 91, 0.1);
+            width: 20px; height: 20px; border-radius: 50%;
+            border-left-color: var(--accent-color); animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .btn-submit {
+            background-color: var(--secondary-color);
+            transition: all 0.3s ease;
+        }
+        .btn-submit:hover {
+            background-color: #2a407a;
+            transform: translateY(-1px);
+        }
+        
         @media print { .no-print { display: none; } }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <div class="max-w-5xl mx-auto">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-slate-800">Décision Matériel & Accès</h1>
-            <p class="text-slate-500 mt-2 italic">Arbitrage partagé en temps réel</p>
-            <div id="status-indicator" class="mt-2 text-xs font-medium text-slate-400 no-print flex items-center justify-center gap-2">
-                Initialisation...
+    <div class="max-w-6xl mx-auto">
+        <!-- Header avec Logo -->
+        <header class="mb-10 flex flex-col items-center">
+            <img src="logo.png" alt="Logo Institutionnel" class="h-24 mb-4 object-contain" onerror="this.style.display='none'">
+            <h1 class="text-3xl font-extrabold text-secondary tracking-tight">Décision Matériel & Accès</h1>
+            <div id="status-indicator" class="mt-3 text-xs font-bold uppercase tracking-widest text-slate-400 no-print flex items-center gap-2">
+                Initialisation système...
             </div>
         </header>
 
-        <!-- Formulaire -->
-        <div class="card p-6 mb-8 no-print">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Entité / Catégorie</label>
-                    <select id="category" onchange="toggleOtherCategory(this.value)" class="w-full p-3 border border-slate-300 rounded-lg bg-white">
-                        <option value="INASTI">INASTI</option>
-                        <option value="Ombudsman">Ombudsman</option>
-                        <option value="Cabinet Ministériel">Cabinet Ministériel</option>
-                        <option value="Cabinet de Pensions">Cabinet de Pensions</option>
-                        <option value="Audit Externe">Audit Externe</option>
-                        <option value="Cour des Comptes">Cour des Comptes</option>
-                        <option value="Consultant Externe">Consultant Externe</option>
-                        <option value="Partenaire IT Externe">Partenaire IT Externe</option>
-                        <option value="Universités">Universités</option>
-                        <option value="Autre">-- Autre (Saisie libre) --</option>
-                    </select>
-                    <input type="text" id="other-category-name" placeholder="Nom de l'entité..." class="hidden-field mt-3 w-full p-3 border border-orange-300 rounded-lg bg-orange-50">
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Formulaire -->
+            <div class="lg:col-span-5 no-print">
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-secondary mb-6 border-b pb-2">Nouveau Paramétrage</h2>
+                    
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Entité / Catégorie</label>
+                            <select id="category" onchange="toggleOtherCategory(this.value)" class="w-full p-3 border border-slate-200 rounded bg-slate-50 focus:ring-2 focus:ring-accent outline-none">
+                                <option value="INASTI">INASTI</option>
+                                <option value="Ombudsman">Ombudsman</option>
+                                <option value="Cabinet Ministériel">Cabinet Ministériel</option>
+                                <option value="Cabinet de Pensions">Cabinet de Pensions</option>
+                                <option value="Audit Externe">Audit Externe</option>
+                                <option value="Cour des Comptes">Cour des Comptes</option>
+                                <option value="Consultant Externe">Consultant Externe</option>
+                                <option value="Partenaire IT Externe">Partenaire IT Externe</option>
+                                <option value="Universités">Universités</option>
+                                <option value="Autre">-- Autre (Saisie libre) --</option>
+                            </select>
+                            <input type="text" id="other-category-name" placeholder="Nom de l'entité..." class="hidden-field mt-3 w-full p-3 border border-accent rounded bg-cyan-50 text-secondary italic">
+                        </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Matériel Requis</label>
-                    <select id="hardware" onchange="toggleOtherHardware(this.value)" class="w-full p-3 border border-slate-300 rounded-lg bg-white">
-                        <option value="Aucun Matériel (BYOD)">Aucun Matériel (BYOD)</option>
-                        <option value="Laptop Standard">Laptop Standard</option>
-                        <option value="Laptop Standard + Smartphone">Laptop Standard + Smartphone</option>
-                        <option value="Smartphone/Tablette">Smartphone/Tablette</option>
-                        <option value="Autre">-- Autre (Saisie libre) --</option>
-                    </select>
-                    <input type="text" id="other-hardware-name" placeholder="Précisez le matériel..." class="hidden-field mt-3 w-full p-3 border border-emerald-300 rounded-lg bg-emerald-50">
-                </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Matériel Requis</label>
+                            <select id="hardware" onchange="toggleOtherHardware(this.value)" class="w-full p-3 border border-slate-200 rounded bg-slate-50 focus:ring-2 focus:ring-accent outline-none">
+                                <option value="Aucun Matériel (BYOD)">Aucun Matériel (BYOD)</option>
+                                <option value="Laptop Standard">Laptop Standard</option>
+                                <option value="Laptop Standard + Smartphone">Laptop Standard + Smartphone</option>
+                                <option value="Smartphone/Tablette">Smartphone/Tablette</option>
+                                <option value="Autre">-- Autre (Saisie libre) --</option>
+                            </select>
+                            <input type="text" id="other-hardware-name" placeholder="Précisez le matériel..." class="hidden-field mt-3 w-full p-3 border border-accent rounded bg-cyan-50 text-secondary italic">
+                        </div>
 
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Types d'Accès</label>
-                    <div id="access-options" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-4 border border-slate-300 rounded-lg bg-slate-50">
-                        <label class="flex items-center p-2 rounded cursor-pointer"><input type="checkbox" value="VPN" class="mr-3"> VPN</label>
-                        <label class="flex items-center p-2 rounded cursor-pointer"><input type="checkbox" value="Theseos" class="mr-3"> Theseos</label>
-                        <label class="flex items-center p-2 rounded cursor-pointer"><input type="checkbox" value="O365" class="mr-3"> O365</label>
-                        <label class="flex items-center p-2 rounded cursor-pointer"><input type="checkbox" value="App .NET" class="mr-3"> App .NET</label>
-                        <label class="flex items-center p-2 rounded cursor-pointer"><input type="checkbox" id="check-other-access" onchange="toggleOtherAccessField(this.checked)" class="mr-3"> <span class="font-bold">Autre...</span></label>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Accès (Sélection multiple)</label>
+                            <div id="access-options" class="grid grid-cols-2 gap-2 p-3 border border-slate-200 rounded bg-slate-50 text-sm">
+                                <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="VPN" class="mr-2"> VPN</label>
+                                <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="Theseos" class="mr-2"> Theseos</label>
+                                <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="O365" class="mr-2"> O365</label>
+                                <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="App .NET" class="mr-2"> App .NET</label>
+                                <label class="flex items-center cursor-pointer font-bold text-accent col-span-2 mt-1 border-t pt-1"><input type="checkbox" id="check-other-access" onchange="toggleOtherAccessField(this.checked)" class="mr-2"> Autre accès spécifique...</label>
+                            </div>
+                            <input type="text" id="other-access-text" placeholder="Précisez l'accès..." class="hidden-field mt-3 w-full p-3 border border-accent rounded bg-cyan-50 text-secondary italic">
+                        </div>
+
+                        <button id="add-btn" onclick="addDecision()" class="w-full btn-submit text-white font-bold py-4 px-6 rounded shadow-lg flex items-center justify-center gap-2">
+                            <span>ENREGISTRER LA DÉCISION</span>
+                        </button>
                     </div>
-                    <input type="text" id="other-access-text" placeholder="Saisissez l'accès spécifique..." class="hidden-field mt-3 w-full p-3 border border-indigo-300 rounded-lg bg-indigo-50">
                 </div>
+            </div>
 
-                <div class="md:col-span-2">
-                    <button id="add-btn" onclick="addDecision()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-6 rounded-lg transition-all disabled:opacity-50">
-                        Valider la décision
+            <!-- Matrice -->
+            <div class="lg:col-span-7">
+                <div class="card overflow-hidden">
+                    <div class="bg-secondary px-6 py-4 flex justify-between items-center">
+                        <h2 class="text-white font-bold uppercase tracking-wider text-sm">Matrice Récapitulative</h2>
+                        <button onclick="clearAll()" class="text-[10px] text-slate-300 hover:text-white underline uppercase tracking-tighter no-print">Effacer la base</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-secondary uppercase text-[10px] font-black border-b border-slate-200">
+                                    <th class="px-4 py-3">Catégorie</th>
+                                    <th class="px-4 py-3">Équipement</th>
+                                    <th class="px-4 py-3">Accès autorisés</th>
+                                    <th class="px-4 py-3 no-print w-10 text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="decision-table-body" class="divide-y divide-slate-100 text-sm">
+                                <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">Connexion sécurisée en cours...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex justify-end no-print">
+                    <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-slate-300 text-secondary px-4 py-2 rounded text-xs font-bold hover:bg-slate-50 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        EXPORTER EN PDF / IMPRIMER
                     </button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Matrice -->
-        <div class="card overflow-hidden">
-            <div class="bg-slate-50 px-6 py-4 border-b flex justify-between items-center">
-                <h2 class="text-xl font-bold text-slate-800">Matrice de Décision</h2>
-                <button onclick="clearAll()" class="text-sm text-red-600 hover:text-red-800 font-medium no-print">Réinitialiser tout</button>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-600 uppercase text-xs font-semibold">
-                            <th class="px-6 py-4 border-b">Catégorie</th>
-                            <th class="px-6 py-4 border-b">Matériel</th>
-                            <th class="px-6 py-4 border-b">Accès</th>
-                            <th class="px-6 py-4 border-b no-print">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="decision-table-body" class="divide-y divide-slate-200 text-sm">
-                        <tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">Connexion à la base de données...</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -110,8 +148,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- ÉTAPE CRUCIALE POUR GITHUB ---
-        // Remplacez ces valeurs par celles de votre console Firebase (Project Settings)
+        // --- DONNÉES FIREBASE MISES À JOUR ---
         const firebaseConfig = {
             apiKey: "AIzaSyDq6ChjjTWckfBP9z1oLvpXIp9rPriUKvc",
             authDomain: "externalusers-f112c.firebaseapp.com",
@@ -120,52 +157,58 @@
             messagingSenderId: "383725496750",
             appId: "1:383725496750:web:595ffd58a4cb4fd5cd003f"
         };
-        // ----------------------------------
+        // -------------------------------------
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const COLLECTION_PATH = "decisions_app_shared"; // Nom de votre collection
+        const COLLECTION_NAME = "decisions_matrice_v2";
 
         let user = null;
         let decisions = [];
 
         const setStatus = (msg, loading = false) => {
             const el = document.getElementById('status-indicator');
+            if (!el) return;
             el.innerHTML = loading ? `<div class="loading-spinner"></div> <span>${msg}</span>` : `<span>● ${msg}</span>`;
-            el.className = `mt-2 text-xs font-medium flex items-center justify-center gap-2 ${loading ? 'text-indigo-500' : 'text-emerald-500'}`;
+            el.className = `mt-3 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 ${loading ? 'text-accent' : 'text-emerald-600'}`;
         };
 
-        // Auth
         signInAnonymously(auth).then(cred => {
             user = cred.user;
-            setStatus("Connecté au Cloud");
+            setStatus("Accès Cloud Établi");
             loadData();
         }).catch(err => {
+            setStatus("Erreur de liaison");
             console.error(err);
-            setStatus("Erreur de configuration Firebase", false);
-            document.getElementById('decision-table-body').innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 font-bold">CONFIG FIREBASE MANQUANTE<br><small>Éditez le code source pour ajouter vos clés API.</small></td></tr>`;
         });
 
-        // Real-time
         const loadData = () => {
-            onSnapshot(collection(db, COLLECTION_PATH), (snap) => {
+            onSnapshot(collection(db, COLLECTION_NAME), (snap) => {
                 decisions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderTable();
+            }, (error) => {
+                console.error("Erreur de lecture Firestore:", error);
             });
         };
 
         window.renderTable = () => {
             const body = document.getElementById('decision-table-body');
-            body.innerHTML = decisions.length ? '' : '<tr><td colspan="4" class="p-12 text-center text-slate-400 italic">Aucune donnée.</td></tr>';
+            if (!body) return;
+            body.innerHTML = decisions.length ? '' : '<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">Aucun enregistrement trouvé.</td></tr>';
             
             decisions.sort((a,b) => a.category.localeCompare(b.category)).forEach(d => {
                 const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-colors group";
                 row.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-slate-800">${d.category}</td>
-                    <td class="px-6 py-4">${d.hardware}</td>
-                    <td class="px-6 py-4">${d.access.split('|').map(a => `<span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs mr-1 font-bold">${a}</span>`).join('')}</td>
-                    <td class="px-6 py-4 no-print"><button onclick="deleteRow('${d.id}')" class="text-red-400 hover:text-red-600">Supprimer</button></td>
+                    <td class="px-4 py-4 font-bold text-secondary border-l-4 border-transparent group-hover:border-accent">${d.category}</td>
+                    <td class="px-4 py-4 text-slate-600">${d.hardware}</td>
+                    <td class="px-4 py-4">${d.access.split('|').map(a => `<span class="inline-block bg-slate-100 text-secondary px-2 py-0.5 rounded text-[10px] mr-1 border border-slate-200 font-bold mb-1 uppercase">${a}</span>`).join('')}</td>
+                    <td class="px-4 py-4 no-print text-center">
+                        <button onclick="deleteRow('${d.id}')" class="text-slate-300 hover:text-primary transition-colors">
+                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </td>
                 `;
                 body.appendChild(row);
             });
@@ -173,6 +216,7 @@
 
         window.addDecision = async () => {
             const btn = document.getElementById('add-btn');
+            if (!btn) return;
             btn.disabled = true;
 
             let category = document.getElementById('category').value;
@@ -185,19 +229,25 @@
                 return cb.id === 'check-other-access' ? document.getElementById('other-access-text').value.trim() : cb.value;
             }).filter(v => v);
 
-            if (!category || !access.length) { alert("Complétez le formulaire."); btn.disabled = false; return; }
+            if (!category || !access.length) { alert("Saisie incomplète."); btn.disabled = false; return; }
 
             try {
-                const id = category.toLowerCase().replace(/\s+/g, '_');
-                await setDoc(doc(db, COLLECTION_PATH, id), { category, hardware, access: access.join('|') });
-            } catch (e) { alert("Erreur Firebase : Vérifiez vos règles de sécurité Firestore."); }
+                const docId = category.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                await setDoc(doc(db, COLLECTION_NAME, docId), { category, hardware, access: access.join('|'), ts: Date.now() });
+                
+                // Reset simple des champs spécifiques
+                document.getElementById('other-category-name').value = "";
+                document.getElementById('other-hardware-name').value = "";
+                document.getElementById('other-access-text').value = "";
+            } catch (e) { 
+                alert("Erreur d'écriture. Vérifiez que Firestore est bien en 'Mode Test'."); 
+            }
             btn.disabled = false;
         };
 
-        window.deleteRow = (id) => deleteDoc(doc(db, COLLECTION_PATH, id));
-        window.clearAll = () => { if(confirm("Tout effacer ?")) decisions.forEach(d => deleteRow(d.id)); };
+        window.deleteRow = (id) => deleteDoc(doc(db, COLLECTION_NAME, id));
+        window.clearAll = () => { if(confirm("Réinitialiser l'ensemble de la matrice ?")) decisions.forEach(d => deleteRow(d.id)); };
 
-        // UI toggles
         window.toggleOtherCategory = v => document.getElementById('other-category-name').style.display = v === 'Autre' ? 'block' : 'none';
         window.toggleOtherHardware = v => document.getElementById('other-hardware-name').style.display = v === 'Autre' ? 'block' : 'none';
         window.toggleOtherAccessField = c => document.getElementById('other-access-text').style.display = c ? 'block' : 'none';
