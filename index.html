@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Outil de Décision - Matériel & Accès</title>
+    <title>Gestion des Accès Externes - Reporting</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -13,13 +13,6 @@
         }
         body { background-color: #f1f5f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
-        .bg-primary { background-color: var(--primary-color); }
-        .bg-secondary { background-color: var(--secondary-color); }
-        .bg-accent { background-color: var(--accent-color); }
-        .text-primary { color: var(--primary-color); }
-        .text-secondary { color: var(--secondary-color); }
-        .border-accent { border-color: var(--accent-color); }
-
         .card { background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(27, 45, 91, 0.1); border-top: 4px solid var(--primary-color); }
         .hidden-field { display: none; }
         
@@ -41,7 +34,6 @@
         
         @media print { .no-print { display: none; } }
 
-        /* Style spécifique pour le conteneur du logo */
         .logo-container {
             background: white;
             padding: 1.5rem;
@@ -55,45 +47,65 @@
             border: 1px solid #e2e8f0;
         }
 
-        .logo-img {
-            max-height: 110px;
-            max-width: 220px;
-            width: auto;
-            display: block;
-            object-fit: contain;
-        }
+        .logo-img { max-height: 110px; max-width: 220px; width: auto; display: block; object-fit: contain; }
 
-        /* Badges de couleur pour les accès */
+        /* Badges & Progress Bar */
         .badge-vpn { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
         .badge-theseos { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
         .badge-o365 { background-color: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
         .badge-dotnet { background-color: #fdf2f8; color: #9d174d; border: 1px solid #fbcfe8; }
         .badge-default { background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+        .progress-container { background-color: #e2e8f0; border-radius: 9999px; height: 12px; overflow: hidden; }
+        .progress-bar { background: linear-gradient(90deg, var(--accent-color), #4ade80); transition: width 0.8s ease-in-out; }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
     <div class="max-w-6xl mx-auto">
-        <!-- Header avec Logo GitHub -->
         <header class="mb-10 flex flex-col items-center">
             <div class="logo-container">
+                <!-- Remplacer 'VOTRE_CODE_BASE64_ICI' par le code du logo pour anonymisation totale -->
                 <img id="main-logo" 
-                     src="https://github.com/Noexicaise/ExternalUsers/blob/main/logo.png?raw=true" 
-                     alt="[Logo Institutionnel]" 
+                     src="data:image/png;base64,VOTRE_CODE_BASE64_ICI" 
+                     alt="Logo Institutionnel" 
                      class="logo-img" 
-                     onerror="this.onerror=null; this.src='https://placehold.co/240x120/white/1B2D5B?text=LOGO+INSTITUTIONNEL';">
+                     onerror="this.style.display='none'; document.getElementById('logo-placeholder').style.display='block';">
+                
+                <div id="logo-placeholder" style="display:none;" class="text-secondary font-bold text-xl tracking-tighter italic">
+                    [ LOGO INSTITUTIONNEL ]
+                </div>
             </div>
-            <h1 class="text-3xl font-extrabold text-secondary tracking-tight text-center">Décision Matériel & Accès</h1>
-            <div id="status-indicator" class="mt-3 text-xs font-bold uppercase tracking-widest text-slate-400 no-print flex items-center gap-2">
-                Initialisation système...
+            <h1 class="text-3xl font-extrabold text-secondary tracking-tight text-center">Matrice de Conformité des Accès</h1>
+            <div id="status-indicator" class="mt-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 no-print flex items-center gap-2">
+                Initialisation sécurisée...
             </div>
         </header>
+
+        <!-- Section Statistiques et Progression -->
+        <div class="mb-8 card p-6 border-t-0 border-l-4 border-accent">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <h3 class="text-secondary font-bold text-sm uppercase">État d'avancement du registre</h3>
+                    <p class="text-slate-500 text-xs">Couverture des entités répertoriées</p>
+                </div>
+                <div class="text-right">
+                    <span id="progress-text" class="text-2xl font-black text-secondary">0%</span>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div id="progress-bar-fill" class="progress-bar h-full w-0"></div>
+            </div>
+            <div id="progress-subtext" class="mt-2 text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                Chargement des données...
+            </div>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <!-- Formulaire de saisie -->
             <div class="lg:col-span-5 no-print">
                 <div class="card p-6">
-                    <h2 class="text-lg font-bold text-secondary mb-6 border-b pb-2">Nouveau Paramétrage</h2>
+                    <h2 class="text-lg font-bold text-secondary mb-6 border-b pb-2">Nouvelle Configuration</h2>
                     
                     <div class="space-y-5">
                         <div>
@@ -114,7 +126,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Matériel Requis</label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Matériel Déterminé</label>
                             <select id="hardware" onchange="toggleOtherHardware(this.value)" class="w-full p-3 border border-slate-200 rounded bg-slate-50 focus:ring-2 focus:ring-accent outline-none">
                                 <option value="Aucun Matériel (BYOD)">Aucun Matériel (BYOD)</option>
                                 <option value="Laptop Standard">Laptop Standard</option>
@@ -126,38 +138,38 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Accès (Sélection multiple)</label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Accès Autorisés</label>
                             <div id="access-options" class="grid grid-cols-2 gap-2 p-3 border border-slate-200 rounded bg-slate-50 text-sm">
                                 <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="VPN" class="mr-2"> VPN</label>
                                 <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="Theseos" class="mr-2"> Theseos</label>
                                 <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="O365" class="mr-2"> O365</label>
                                 <label class="flex items-center cursor-pointer hover:text-primary"><input type="checkbox" value="App .NET" class="mr-2"> App .NET</label>
-                                <label class="flex items-center cursor-pointer font-bold text-accent col-span-2 mt-1 border-t pt-1"><input type="checkbox" id="check-other-access" onchange="toggleOtherAccessField(this.checked)" class="mr-2"> Autre accès spécifique...</label>
+                                <label class="flex items-center cursor-pointer font-bold text-accent col-span-2 mt-1 border-t pt-1"><input type="checkbox" id="check-other-access" onchange="toggleOtherAccessField(this.checked)" class="mr-2"> Autre accès...</label>
                             </div>
                             <input type="text" id="other-access-text" placeholder="Précisez l'accès..." class="hidden-field mt-3 w-full p-3 border border-accent rounded bg-cyan-50 text-secondary italic">
                         </div>
 
                         <button id="add-btn" onclick="addDecision()" class="w-full btn-submit text-white font-bold py-4 px-6 rounded shadow-lg flex items-center justify-center gap-2">
-                            <span>ENREGISTRER LA DÉCISION</span>
+                            <span>ENREGISTRER AU REGISTRE</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Matrice récapitulative -->
+            <!-- Registre récapitulatif -->
             <div class="lg:col-span-7">
                 <div class="card overflow-hidden">
                     <div class="bg-secondary px-6 py-4 flex justify-between items-center">
-                        <h2 class="text-white font-bold uppercase tracking-wider text-sm">Matrice Récapitulative</h2>
-                        <button onclick="clearAll()" class="text-[10px] text-slate-300 hover:text-white underline uppercase tracking-tighter no-print">Effacer la base</button>
+                        <h2 class="text-white font-bold uppercase tracking-wider text-sm">Registre des Décisions</h2>
+                        <button onclick="clearAll()" class="text-[10px] text-slate-300 hover:text-white underline uppercase tracking-tighter no-print">Effacer l'historique</button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 text-secondary uppercase text-[10px] font-black border-b border-slate-200">
-                                    <th class="px-4 py-3">Catégorie</th>
+                                    <th class="px-4 py-3">Entité</th>
                                     <th class="px-4 py-3">Équipement</th>
-                                    <th class="px-4 py-3">Accès autorisés</th>
+                                    <th class="px-4 py-3">Droits d'accès</th>
                                     <th class="px-4 py-3 no-print w-10 text-center"></th>
                                 </tr>
                             </thead>
@@ -171,7 +183,7 @@
                 <div class="mt-6 flex justify-end no-print">
                     <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-slate-300 text-secondary px-4 py-2 rounded text-xs font-bold hover:bg-slate-50 transition-all shadow-sm">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        EXPORTER EN PDF / IMPRIMER
+                        GÉNÉRER LE RAPPORT NIS2
                     </button>
                 </div>
             </div>
@@ -196,11 +208,18 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'external-decision-tool-v1';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'external-compliance-tool-v2';
         const COLLECTION_PATH = `artifacts/${appId}/public/data/matrix`;
 
         let user = null;
         let decisions = [];
+
+        // Liste des catégories définies dans le select (hors "Autre")
+        const PREDEFINED_CATEGORIES = [
+            "INASTI", "Ombudsman", "Cabinet Ministériel", "Cabinet de Pensions", 
+            "Audit Externe", "Cour des Comptes", "Consultant Externe", 
+            "Partenaire IT Externe", "Universités"
+        ];
 
         const setStatus = (msg, loading = false) => {
             const el = document.getElementById('status-indicator');
@@ -213,11 +232,10 @@
             try {
                 const cred = await signInAnonymously(auth);
                 user = cred.user;
-                setStatus("Cloud opérationnel");
+                setStatus("Infrastructure Active");
                 loadData();
             } catch (err) {
-                setStatus("Erreur Cloud");
-                console.error(err);
+                setStatus("Erreur de liaison Cloud");
             }
         };
 
@@ -227,38 +245,51 @@
             if (!user) return;
             onSnapshot(collection(db, COLLECTION_PATH), (snap) => {
                 decisions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderTable();
-            }, (error) => {
-                console.error("Firestore Error:", error);
+                updateUI();
             });
         };
 
-        // Fonction pour formater les badges d'accès avec couleur
+        const updateUI = () => {
+            renderTable();
+            updateProgressBar();
+        };
+
+        const updateProgressBar = () => {
+            // On compte combien de catégories prédéfinies sont présentes dans les décisions
+            const existingCategories = new Set(decisions.map(d => d.category.toUpperCase()));
+            const covered = PREDEFINED_CATEGORIES.filter(cat => existingCategories.has(cat.toUpperCase())).length;
+            const total = PREDEFINED_CATEGORIES.length;
+            const percentage = Math.round((covered / total) * 100);
+
+            const bar = document.getElementById('progress-bar-fill');
+            const text = document.getElementById('progress-text');
+            const subtext = document.getElementById('progress-subtext');
+
+            if (bar) bar.style.width = `${percentage}%`;
+            if (text) text.innerText = `${percentage}%`;
+            if (subtext) subtext.innerText = `${covered} entités sur ${total} documentées`;
+        };
+
         const getAccessBadge = (accessName) => {
             let className = "badge-default";
-            const lower = accessName.toLowerCase();
-            
+            const lower = (accessName || "").toLowerCase();
             if (lower.includes("vpn")) className = "badge-vpn";
             else if (lower.includes("theseos")) className = "badge-theseos";
             else if (lower.includes("o365")) className = "badge-o365";
             else if (lower.includes(".net")) className = "badge-dotnet";
-            
             return `<span class="inline-block px-2 py-0.5 rounded text-[10px] mr-1 font-bold mb-1 uppercase ${className}">${accessName}</span>`;
         };
 
         window.renderTable = () => {
             const body = document.getElementById('decision-table-body');
             if (!body) return;
-            body.innerHTML = decisions.length ? '' : '<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">Aucune règle définie.</td></tr>';
+            body.innerHTML = decisions.length ? '' : '<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">Registre vide.</td></tr>';
             
             const sorted = [...decisions].sort((a,b) => (a.category || "").localeCompare(b.category || ""));
-            
             sorted.forEach(d => {
                 const row = document.createElement('tr');
                 row.className = "hover:bg-slate-50 transition-colors group border-b border-slate-100";
-                
                 const accessBadges = (d.access || "").split('|').map(a => getAccessBadge(a)).join('');
-
                 row.innerHTML = `
                     <td class="px-4 py-4 font-bold text-secondary border-l-4 border-transparent group-hover:border-accent">${d.category}</td>
                     <td class="px-4 py-4 text-slate-600">${d.hardware}</td>
@@ -277,71 +308,37 @@
             if (!user) return;
             const btn = document.getElementById('add-btn');
             btn.disabled = true;
-
             let category = document.getElementById('category').value;
             if (category === 'Autre') {
                 const other = document.getElementById('other-category-name').value.trim();
-                if (!other) { alert("Nom d'entité requis"); btn.disabled = false; return; }
+                if (!other) { alert("Saisie requise"); btn.disabled = false; return; }
                 category = other.toUpperCase();
             }
-
             let hardware = document.getElementById('hardware').value;
             if (hardware === 'Autre') {
                 const otherH = document.getElementById('other-hardware-name').value.trim();
-                if (!otherH) { alert("Précision matériel requise"); btn.disabled = false; return; }
+                if (!otherH) { alert("Saisie matériel requise"); btn.disabled = false; return; }
                 hardware = otherH;
             }
-
             const access = Array.from(document.querySelectorAll('#access-options input:checked')).map(cb => {
-                if (cb.id === 'check-other-access') {
-                    return document.getElementById('other-access-text').value.trim();
-                }
+                if (cb.id === 'check-other-access') return document.getElementById('other-access-text').value.trim();
                 return cb.value;
             }).filter(v => v);
-
-            if (!category || !access.length) { 
-                alert("Veuillez remplir l'entité et au moins un accès."); 
-                btn.disabled = false; 
-                return; 
-            }
-
+            if (!category || !access.length) { alert("Données incomplètes."); btn.disabled = false; return; }
             try {
                 const docId = category.toLowerCase().replace(/[^a-z0-9]/g, '_');
-                await setDoc(doc(db, COLLECTION_PATH, docId), { 
-                    category, 
-                    hardware, 
-                    access: access.join('|'), 
-                    updatedAt: Date.now() 
-                });
-                
-                // Reset form
+                await setDoc(doc(db, COLLECTION_PATH, docId), { category, hardware, access: access.join('|'), updatedAt: Date.now() });
                 document.getElementById('other-category-name').value = "";
                 document.getElementById('other-hardware-name').value = "";
                 document.getElementById('other-access-text').value = "";
                 document.querySelectorAll('#access-options input').forEach(cb => cb.checked = false);
                 toggleOtherAccessField(false);
-            } catch (e) { 
-                console.error("Save Error:", e);
-            }
+            } catch (e) { console.error(e); }
             btn.disabled = false;
         };
 
-        window.deleteRow = async (id) => {
-            if (!user) return;
-            if(confirm("Confirmer la suppression ?")) {
-                await deleteDoc(doc(db, COLLECTION_PATH, id));
-            }
-        };
-
-        window.clearAll = async () => { 
-            if (!user) return;
-            if(confirm("Réinitialiser toute la matrice ?")) {
-                for (const d of decisions) {
-                    await deleteDoc(doc(db, COLLECTION_PATH, d.id));
-                }
-            }
-        };
-
+        window.deleteRow = async (id) => { if (user && confirm("Supprimer du registre ?")) await deleteDoc(doc(db, COLLECTION_PATH, id)); };
+        window.clearAll = async () => { if (user && confirm("Effacer tout le registre ?")) for (const d of decisions) await deleteDoc(doc(db, COLLECTION_PATH, d.id)); };
         window.toggleOtherCategory = v => document.getElementById('other-category-name').style.display = v === 'Autre' ? 'block' : 'none';
         window.toggleOtherHardware = v => document.getElementById('other-hardware-name').style.display = v === 'Autre' ? 'block' : 'none';
         window.toggleOtherAccessField = c => document.getElementById('other-access-text').style.display = c ? 'block' : 'none';
